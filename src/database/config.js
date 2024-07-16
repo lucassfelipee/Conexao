@@ -1,34 +1,38 @@
-var mysql = require("mysql2");
+const mysql = require('mysql');
 
-// CONEXÃO DO BANCO MYSQL SERVER
-var mySqlConfig = {
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT
-};
+const pool = mysql.createPool({
+    connectionLimit: 10, 
+    host: 'localhost',
+    user: 'root',
+    password: 'sptech',
+    database: 'cantina'
+});
 
-function executar(instrucao) {
 
-    if (process.env.AMBIENTE_PROCESSO !== "producao" && process.env.AMBIENTE_PROCESSO !== "desenvolvimento") {
-        console.log("\nO AMBIENTE (produção OU desenvolvimento) NÃO FOI DEFINIDO EM .env OU dev.env OU app.js\n");
-        return Promise.reject("AMBIENTE NÃO CONFIGURADO EM .env");
-    }
-
-    return new Promise(function (resolve, reject) {
-        var conexao = mysql.createConnection(mySqlConfig);
-        conexao.connect();
-        conexao.query(instrucao, function (erro, resultados) {
-            conexao.end();
-            if (erro) {
-                reject(erro);
+function executar(sql, valores) {
+    return new Promise((resolve, reject) => {
+        
+        pool.getConnection((err, connection) => {
+            if (err) {
+                console.error('Erro ao obter conexão do pool:', err);
+                reject(err);
+                return;
             }
-            console.log(resultados);
-            resolve(resultados);
-        });
-        conexao.on('error', function (erro) {
-            return ("ERRO NO MySQL SERVER: ", erro.sqlMessage);
+
+            
+            connection.query(sql, valores, (err, results, fields) => {
+                
+                connection.release();
+
+                if (err) {
+                    console.error('Erro ao executar a consulta SQL:', err);
+                    reject(err);
+                    return;
+                }
+
+                
+                resolve(results);
+            });
         });
     });
 }
