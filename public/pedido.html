@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="pedido.css">
+    <title>Conexão</title>
+</head>
+
+<body>
+    <h1>Cantina Conexão</h1>
+    <h4>Nome:</h4>
+    Nome do cliente: <input type="text" id="ipt_nome">
+    <h4>Salgados:</h4>
+    <div id="salgados">
+        <div>
+            <input type="checkbox" name="salgado" class="tipo_salgado" value="Esfiha"> Esfiha - Quantidade:
+            <input type="number" min="0" value="0" class="qtd_salgado">
+        </div>
+        <div>
+            <input type="checkbox" name="salgado" class="tipo_salgado" value="Hamburgão"> Hamburgão - Quantidade:
+            <input type="number" min="0" value="0" class="qtd_salgado">
+        </div>
+        <div>
+            <input type="checkbox" name="salgado" class="tipo_salgado" value="Enroladinho"> Enroladinho - Quantidade:
+            <input type="number" min="0" value="0" class="qtd_salgado">
+        </div>
+    </div>
+
+    <h4> Refrigerantes:</h4>
+    <div id="refrigerantes">
+        <div>
+            <input type="checkbox" name="refrigerante" class="tipo_refrigerante" value="Coca-Cola"> Coca-Cola - Quantidade:
+            <input type="number" min="0" value="0" class="qtd_refrigerante">
+        </div>
+        <div>
+            <input type="checkbox" name="refrigerante" class="tipo_refrigerante" value="Coca-Cola Zero"> Coca-Cola Zero - Quantidade:
+            <input type="number" min="0" value="0" class="qtd_refrigerante">
+        </div>
+        <div>
+            <input type="checkbox" name="refrigerante" class="tipo_refrigerante" value="Pepsi"> Pepsi - Quantidade:
+            <input type="number" min="0" value="0" class="qtd_refrigerante">
+        </div>
+        <div>
+            <input type="checkbox" name="refrigerante" class="tipo_refrigerante" value="Guaraná"> Guaraná - Quantidade:
+            <input type="number" min="0" value="0" class="qtd_refrigerante">
+        </div>
+    </div>
+
+    <br><br>
+    <button onclick="calcular()">Enviar Pedido</button>
+
+    <div id="div_mensagem"></div>
+
+    <div id="estoque_atualizado">
+        <h2>Estoque Atualizado</h2>
+        <h3>Salgados:</h3>
+        <ul>
+            <li>Esfiha: <span id="estoque_esfiha">50</span></li>
+            <li>Hamburgão: <span id="estoque_hamburgao">50</span></li>
+            <li>Enroladinho: <span id="estoque_enroladinho">50</span></li>
+        </ul>
+        <h3>Refrigerantes:</h3>
+        <ul>
+            <li>Coca-Cola: <span id="estoque_cocacola">20</span></li>
+            <li>Coca-Cola Zero: <span id="estoque_cocacolazero">20</span></li>
+            <li>Pepsi: <span id="estoque_pepsi">20</span></li>
+            <li>Guaraná: <span id="estoque_guarana">20</span></li>
+        </ul>
+    </div>
+
+    <script>
+        var num_pedido = 1;
+        var preco_salgado = 5;
+        var preco_refrigerante = 3;
+
+        var estoque_salgados = {"Esfiha": 50,"Hamburgão": 50,"Enroladinho": 50 };
+
+        var estoque_refrigerantes = {"Coca-Cola": 20,"Coca-Cola Zero": 20,"Pepsi": 20,"Guaraná": 20};
+
+        function calcular() {
+            var nome = ipt_nome.value;
+            div_mensagem.innerHTML = "";
+            
+            var tipos_salgados = document.querySelectorAll(".tipo_salgado");
+            var qtds_salgados = document.querySelectorAll(".qtd_salgado");
+            var pedidos_salgados = [];
+            var tipos_refrigerantes = document.querySelectorAll(".tipo_refrigerante");
+            var qtd_refrigerantes = document.querySelectorAll(".qtd_refrigerante");
+            var pedidos_refrigerantes = [];
+            var total_salgados = 0;
+            var total_refrigerantes = 0;
+            
+            
+            for (var index = 0; index < tipos_salgados.length; index++) {
+                var tipo_salgado = tipos_salgados[index];
+                var tipo = tipo_salgado.value;
+                var qtd = qtds_salgados[index].value;
+                if (tipo_salgado.checked && qtd > 0) {
+                    pedidos_salgados.push({ tipo: tipo, qtd: qtd });
+                }
+            }
+            
+
+            for (var index = 0; index < tipos_refrigerantes.length; index++) {
+                var tipo_refrigerante = tipos_refrigerantes[index];
+                var refrigerante = tipo_refrigerante.value;
+                var qtd = qtd_refrigerantes[index].value;
+                if (tipo_refrigerante.checked && qtd > 0) {
+                    pedidos_refrigerantes.push({ refrigerante: refrigerante, qtd: qtd });
+                }
+            }
+
+
+            
+            for (var index = 0; index < pedidos_salgados.length; index++) {
+                var pedido = pedidos_salgados[index];
+                total_salgados += pedido.qtd * preco_salgado;
+                estoque_salgados[pedido.tipo] = estoque_salgados[pedido.tipo] - parseInt(pedido.qtd);
+            }
+
+            
+            for (var index = 0; index < pedidos_refrigerantes.length; index++) {
+                var pedido_refrigerante = pedidos_refrigerantes[index];
+                total_refrigerantes += pedido_refrigerante.qtd * preco_refrigerante;
+                estoque_refrigerantes[pedido_refrigerante.refrigerante] = estoque_refrigerantes[pedido_refrigerante.refrigerante] - parseInt(pedido_refrigerante.qtd);
+            }
+
+            var total_pedido = total_salgados + total_refrigerantes;
+
+            var pedido_HTML = `Número do pedido: ${num_pedido} <br> Nome: ${nome} <br>`;
+
+            if (pedidos_salgados.length > 0) {
+                pedido_HTML += "<br>Salgados:";
+                for (var index = 0; index < pedidos_salgados.length; index++) {
+                    var item = pedidos_salgados[index];
+                    pedido_HTML += `<br>- ${item.qtd} ${item.tipo}`;
+                }
+                pedido_HTML += `<br>Valor total dos salgados: R$ ${total_salgados.toFixed(2)}`;
+            }
+
+            if (pedidos_refrigerantes.length > 0) {
+                pedido_HTML += "<br>Refrigerantes:";
+                for (var index = 0; index < pedidos_refrigerantes.length; index++){
+                    var item_refrigerante = pedidos_refrigerantes[index];
+                    pedido_HTML += `<br>- ${item_refrigerante.qtd} ${item_refrigerante.refrigerante}`;
+                }
+                pedido_HTML += `<br>Valor total dos refrigerantes: R$ ${total_refrigerantes.toFixed(2)}`;
+            }
+
+            pedido_HTML += `<br><br>Total do Pedido: R$ ${total_pedido.toFixed(2)}`;
+
+            num_pedido++;
+
+            div_mensagem.innerHTML = pedido_HTML;
+
+            
+            document.getElementById("estoque_esfiha").textContent = estoque_salgados["Esfiha"];
+            document.getElementById("estoque_hamburgao").textContent = estoque_salgados["Hamburgão"];
+            document.getElementById("estoque_enroladinho").textContent = estoque_salgados["Enroladinho"];
+            document.getElementById("estoque_cocacola").textContent = estoque_refrigerantes["Coca-Cola"];
+            document.getElementById("estoque_cocacolazero").textContent = estoque_refrigerantes["Coca-Cola Zero"];
+            document.getElementById("estoque_pepsi").textContent = estoque_refrigerantes["Pepsi"];
+            document.getElementById("estoque_guarana").textContent = estoque_refrigerantes["Guaraná"];
+        }
+    </script>
+    </body>
+    </html>
