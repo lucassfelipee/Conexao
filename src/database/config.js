@@ -1,3 +1,5 @@
+// src/config/database.js
+
 const mysql = require('mysql');
 
 const pool = mysql.createPool({
@@ -7,7 +9,6 @@ const pool = mysql.createPool({
     password: 'sptech',
     database: 'cantina'
 });
-
 
 function executar(sql, valores) {
     return new Promise((resolve, reject) => {
